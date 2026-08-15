@@ -1,0 +1,76 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Dados brutos — baixados via Kaggle CLI (kaggle datasets download), não
+# versionados para não redistribuir o dataset no repositório.
+data/raw/*
+!data/raw/.gitkeep
+
+# Dados processados — dataset completo transformado (train/test), gerado por
+# src/data_preparation.py. Também não versionado (é essencialmente o mesmo
+# dataset, só escalado/codificado).
+data/processed/*.csv
+data/processed/*.zip
+data/processed/*.tar.gz
+data/processed/*.pkl
+data/processed/*.json
+
+# Exceções: artefatos pequenos e não sensíveis (o transformer ajustado, listas
+# de nomes de categorias/colunas e o Golden Set) — precisam estar versionados
+# para que a API e os testes funcionem em um clone limpo/CI sem depender do
+# dataset completo do Kaggle, e para o avaliador conferir o Golden Set sem
+# precisar rodar o notebook.
+!data/processed/scaler.pkl
+!data/processed/encoders.json
+!data/processed/feature_names.json
+!data/processed/golden_set.csv
+!data/processed/golden_set_5.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code
+.claude/
+
+# Test cache
+.pytest_cache/
+
+# OS
+.DS_Store
+.env
+.env.local
+
+# Notebooks
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Logs
+*.log
+logs/
+
+# Documentação interna do enunciado/planejamento — não faz parte do
+# entregável público do repositório.
+docs/
+
+# Nota: models/*.json (modelos treinados) e mlflow.db (tracking de
+# experimentos) SÃO versionados propositalmente — sem eles, um clone limpo
+# do repositório não tem modelo para a API servir nem histórico de
+# experimentos para o avaliador conferir com `mlflow ui`. Eles são
+# regenerados a qualquer momento com `python src/train.py`.
