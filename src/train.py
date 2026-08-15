@@ -11,7 +11,23 @@ para que notebook e código de produção nunca fiquem dessincronizados.
 """
 
 import os
+import sys
 from pathlib import Path
+
+# Executado como 'python src/train.py', o Python coloca src/ no sys.path — e não
+# a raiz do repositório —, então os imports 'from src.x import y' abaixo não
+# resolvem. Inserimos a raiz antes deles, mesma abordagem já usada pelos
+# notebooks. Assim funcionam tanto 'python src/train.py' quanto 'python -m src.train'.
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+# No Windows, redirecionar a saída (python src/train.py > treino.log) faz o
+# Python usar cp1252, e os emojis dos prints de progresso derrubam o treino com
+# UnicodeEncodeError antes de qualquer modelo ser treinado.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, 'reconfigure'):
+        _stream.reconfigure(encoding='utf-8')
 
 import mlflow
 import pandas as pd
