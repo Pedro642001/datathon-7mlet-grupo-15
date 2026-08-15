@@ -65,8 +65,6 @@ data/processed/*.json
 *.log
 logs/
 
-# Documentação interna do enunciado/planejamento — não faz parte do
-# entregável público do repositório.
 docs/
 
 # Nota: models/*.json (modelos treinados) e mlflow.db (tracking de
