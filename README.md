@@ -73,8 +73,8 @@ Os gráficos de comparação e convergência ficam embutidos diretamente na saí
 ### 1. Setup
 
 ```bash
-git clone <url>
-cd <repo>
+git clone https://github.com/Pedro642001/datathon-7mlet-grupo-15.git
+cd datathon-7mlet-grupo-15
 
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
