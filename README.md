@@ -153,12 +153,40 @@ flowchart LR
 
 ## 📈 Métricas Observadas (conjunto de teste, prior weakly-informative)
 
+Conjunto de teste com 12.357 clientes, dos quais 1.392 aceitariam a oferta. Os números abaixo são os do run `thompson-weakly-informative` registrado no MLflow — dá para conferir cada um com `mlflow ui`.
+
 | Métrica                                     | Baseline     | Thompson      |
 |---------------------------------------------|--------------|---------------|
 | Taxa de aceitação real (entre recomendados) | 11.3%        | 15.7%         |
-| Clientes recomendados                       | 100% da base | 37.5% da base |
+| Clientes contatados                         | 12.357 (100%)| 4.629 (37.5%) |
+| Conversões obtidas                          | 1.392        | 726           |
+| Contatos por conversão                      | 8.9          | 6.4           |
 
-Ganho relativo de ~39% na taxa de aceitação, contatando bem menos clientes. Números exatos ficam registrados no MLflow e podem variar levemente a cada `python src/train.py` (Thompson Sampling é estocástico).
+### O que esses números significam para a operação
+
+A leitura ingênua ("+39% na taxa de aceitação") esconde o trade-off real: **o Thompson abre mão de 666 conversões**, porque deixa de contatar 62,5% da base e com isso alcança 52% de quem teria aceitado. Comparar 15,7% contra 11,3% sem dizer isso seria comparar coisas diferentes.
+
+A comparação honesta fixa o orçamento de contatos. Contatando os **mesmos 4.629 clientes** de forma aleatória, o Baseline entregaria 521 conversões (a taxa histórica de 11,3% não muda com a amostra); o Thompson entrega 726. **Com o mesmo esforço de operação, são ~39% mais conversões** — e é daí que o ganho realmente vem, não da comparação com a campanha de base inteira.
+
+O mesmo efeito pelo lado do custo: o Baseline precisa de 8,9 contatos para cada conversão, o Thompson precisa de 6,4 — **redução de 28% no custo por aquisição**, seja qual for o custo unitário da ligação.
+
+Isso define quando a política adaptativa vale a pena. Se a operação é limitada por capacidade de contato (o caso usual em telemarketing, onde a equipe consegue ligar para um número fixo de clientes por dia), o Thompson é claramente melhor: mesma capacidade, mais conversões. Se a meta for volume absoluto de vendas e não houver restrição de custo por contato, o Baseline de contatar todo mundo ainda captura mais conversões em termos absolutos — e a resposta seria usar o Thompson para **priorizar a fila** de contatos, não para cortá-la.
+
+Os valores variam levemente a cada `python src/train.py`, já que o Thompson Sampling amostra da posterior.
+
+---
+
+## ⚠️ Limitações Conhecidas
+
+**Escopo da decisão.** O modelo decide *se* vale contatar um cliente, não *qual* de várias ofertas apresentar — são dois braços (ofertar / não ofertar), não um catálogo. A base escolhida traz uma única campanha (depósito a prazo) com a conversão já observada, e a Etapa 2 do desafio permite usá-la diretamente. Para múltiplas ofertas, a mesma estrutura de posterior por segmento se estenderia a uma posterior por (segmento, oferta).
+
+**Segmentação rasa.** O contexto é só idade + profissão (48 segmentos). Dois clientes com histórico de campanha muito diferente, mas mesma faixa etária e profissão, recebem a mesma confiança — é a causa dos erros analisados em `03_evaluation.ipynb`. Um bandit linear contextual usaria todas as features.
+
+**Modelo e scaler são acoplados.** A chave de segmento é derivada dos valores já normalizados (`ThompsonSampler._segment_key`). Se `data_preparation.py` for reexecutado com outro split, o `scaler` muda, as chaves deixam de bater com as salvas em `models/thompson.json` e a API passa a responder com o prior — **sem erro nenhum**. Na prática: `scaler.pkl` e `models/*.json` precisam ser sempre regenerados juntos. Em produção isso exigiria versionar os dois com um identificador comum e validar na carga.
+
+**Categoria desconhecida não é rejeitada.** `ModelService.prepare_features` mapeia um valor categórico fora do vocabulário para o índice 0 e apenas registra um warning, em vez de devolver 422. A API responde com uma recomendação silenciosamente baseada em outra categoria.
+
+**Avaliação é offline.** O ganho é medido reproduzindo decisões sobre respostas já coletadas. Um bandit real aprende com o próprio tráfego que direciona, o que gera viés de feedback — a estimativa offline não substitui um teste controlado em produção.
 
 ---
 
