@@ -22,6 +22,25 @@ O projeto segmenta os clientes por contexto (**idade** + **profissão**, ~48 seg
 - **Tamanho:** 41.188 registros × 21 colunas · **Target:** cliente assinou o depósito a prazo? (11.3% de aceitação, desbalanceado)
 - **Vazamento removido:** a coluna `duration` (só conhecida após o contato) é descartada antes do treino
 - **Dados sensíveis:** sem identificadores, renda, patrimônio, gênero ou raça — apenas atributos comportamentais/demográficos agregados; decisão apenas prioriza contato, nunca nega crédito
+- **Licença:** dataset público de pesquisa, originado do [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/bank+marketing) (Moro, Cortez & Rita, 2014), redistribuído no Kaggle. Não é versionado neste repositório — cada pessoa baixa da fonte
+
+---
+
+## 🔒 Governança de Dados
+
+O projeto **não processa dados de clientes reais**. A base é um dataset público de pesquisa, já anonimizado na origem e usado aqui como referência factual para simular o problema — nenhum registro corresponde a uma pessoa identificável, e nada foi coletado por nós.
+
+**Finalidade.** Priorizar a fila de contato de uma campanha de telemarketing: decidir para quem ligar primeiro, dado um orçamento limitado de ligações. O modelo não avalia risco de crédito, não define preço e não nega produto a ninguém.
+
+**Minimização.** A segmentação usa apenas duas variáveis — faixa etária e profissão. As demais features entram na preparação da base, mas não na decisão. Ficaram deliberadamente de fora do escopo, por não serem necessárias à finalidade acima e por serem sensíveis ou passíveis de discriminação: renda, patrimônio, gênero, raça, estado de saúde e qualquer identificador direto. A coluna `duration` também foi descartada, por vazamento temporal.
+
+**Base legal.** Num cenário real de produção, o tratamento se apoiaria em **legítimo interesse** (LGPD, art. 7º, IX) para priorização de contato comercial junto à base ativa, com opt-out disponível em todos os canais — ou em **consentimento** (art. 7º, I) para clientes que não tenham relação prévia com a instituição. Neste projeto acadêmico não há titulares de dados envolvidos, então nenhuma base legal é exercida de fato.
+
+**Retenção.** Em produção, a política seria: eventos de resposta (aceitou/recusou) retidos por 24 meses, prazo suficiente para retreino sazonal e auditoria da decisão; features do cliente não persistidas fora da base transacional de origem; e os contadores do modelo (`alpha`/`beta` por segmento) mantidos de forma agregada, sem qualquer vínculo com indivíduos. Neste repositório não há retenção — os artefatos versionados (`models/*.json`) guardam apenas contadores agregados por segmento.
+
+**Humano no loop.** A saída do modelo é uma **recomendação de priorização**, não uma decisão automatizada com efeito jurídico sobre o titular. A equipe de campanha decide o que fazer com a fila, e qualquer mudança de política — limiar de decisão, priors, escolha das variáveis de segmentação — passa por aprovação humana antes de ir para produção, como está descrito no fluxo da arquitetura em nuvem.
+
+**Rastreabilidade.** Cada execução de treino fica registrada no MLflow com parâmetros, métricas e o artefato do modelo, permitindo reconstruir qual versão gerou qual recomendação.
 
 ---
 
