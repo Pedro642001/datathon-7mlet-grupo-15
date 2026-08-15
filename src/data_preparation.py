@@ -11,8 +11,14 @@ import pickle
 import os
 import json
 
+# Nome do arquivo exatamente como vem no ZIP do Kaggle
+# (henriqueyamahata/bank-marketing contém bank-additional-full.csv e
+# bank-additional-names.txt), para que o download descrito no README funcione
+# sem nenhum passo manual de renomear.
+RAW_DATA_PATH = 'data/raw/bank-additional-full.csv'
+
 class DataPreparation:
-    def __init__(self, data_path='data/raw/bank_marketing.csv'):
+    def __init__(self, data_path=RAW_DATA_PATH):
         self.data_path = data_path
         self.df = None
         self.train_X = None
@@ -25,6 +31,12 @@ class DataPreparation:
     def load_data(self):
         """Carregar dados"""
         print("📥 Carregando dados...")
+        if not os.path.exists(self.data_path):
+            raise FileNotFoundError(
+                f"{self.data_path} não encontrado. Baixe a base do Kaggle antes de treinar:\n"
+                "  kaggle datasets download -d henriqueyamahata/bank-marketing -p data/raw/\n"
+                "  unzip -o data/raw/bank-marketing.zip -d data/raw/"
+            )
         self.df = pd.read_csv(self.data_path, sep=';')
         print(f"   ✅ {len(self.df):,} registros carregados")
         return self
@@ -166,7 +178,7 @@ class DataPreparation:
             'feature_names': self.get_feature_names()
         }
 
-def prepare_data(data_path='data/raw/bank_marketing.csv', test_size=0.3):
+def prepare_data(data_path=RAW_DATA_PATH, test_size=0.3):
     """Pipeline completo de preparação"""
     prep = DataPreparation(data_path)
     prep.load_data() \
