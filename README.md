@@ -91,6 +91,42 @@ Em produção, os dados brutos e processados ficariam em **S3** (camadas raw/pro
 
 A API seria empacotada em container e servida via **ECS Fargate** ou **Lambda + API Gateway** atrás de um endpoint HTTPS, com autoscaling por volume de requisições. **CloudWatch** cobriria logs, métricas e alarmes de drift, e o **EventBridge** dispararia o retrain agendado quando novos dados chegassem ao S3. Estimativa de custo para volume pequeno/médio: baixo, dominado por Lambda/Fargate sob demanda e armazenamento S3.
 
+```mermaid
+flowchart LR
+    subgraph dados["📦 Dados"]
+        s3raw[("S3 · dados brutos")]
+        s3proc[("S3 · dados processados")]
+    end
+
+    subgraph treino["🧠 Treino & MLOps"]
+        sm["SageMaker Training / AWS Batch<br/>(data_preparation.py + train.py)"]
+        mlf["MLflow Tracking Server<br/>(backend RDS/Aurora)"]
+        s3model[("S3 · artefatos de modelo")]
+        aprova{{"Aprovação humana"}}
+    end
+
+    subgraph serving["🚀 Serving"]
+        apigw["API Gateway"]
+        ecs["ECS Fargate / Lambda<br/>(src.app.main:app)"]
+        cw["CloudWatch<br/>logs · métricas · alarmes"]
+    end
+
+    eb["EventBridge<br/>(retrain agendado)"]
+    cliente["Canal digital"]
+
+    s3raw --> sm
+    sm --> s3proc
+    sm --> mlf
+    sm --> s3model
+    s3model --> aprova
+    aprova -->|aprovado| ecs
+    cliente --> apigw --> ecs
+    ecs --> cw
+    ecs -->|oferta recomendada| cliente
+    cw -. alarme de drift .-> eb
+    eb -->|dispara retrain| sm
+```
+
 ---
 
 ## 📈 Métricas Observadas (conjunto de teste, prior weakly-informative)
