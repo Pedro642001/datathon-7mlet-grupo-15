@@ -108,7 +108,7 @@ diferencia a política adaptativa do Baseline, que responderia 11,3% para os doi
 
 ---
 
-## 🧪 Golden Set - 5 casos de teste
+##  Golden Set - 5 casos de teste
 
 Amostra reduzida - 3 clientes que aceitaram e 2 que rejeitaram, para cobrir os dois desfechos (conjunto completo de 20 casos em `data/processed/golden_set.csv`):
 
