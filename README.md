@@ -37,7 +37,7 @@ pip install -r requirements.txt
 # 2. Baixar os dados (token em https://www.kaggle.com/settings/account)
 kaggle datasets download -d henriqueyamahata/bank-marketing -p data/raw/
 unzip -o data/raw/bank-marketing.zip -d data/raw/
-# arquivo esperado: data/raw/bank_marketing.csv (separador ";")
+# o zip traz bank-additional-full.csv (41.188 linhas, separador ";") e bank-additional-names.txt
 
 # 3. Treinar (prepara dados, treina Baseline + Thompson, registra no MLflow, salva modelos)
 python src/train.py
@@ -56,14 +56,34 @@ mlflow ui --backend-store-uri sqlite:///mlflow/mlflow.db
 
 Notebooks (`jupyter notebook`): `01_eda.ipynb` (análise exploratória), `02_baseline_thompson.ipynb` (treino, comparação e MLflow, reusa `src/train.py`) e `03_evaluation.ipynb` (métricas e Golden Set completo de 20 exemplos).
 
-Exemplo de chamada à API:
+Exemplo de chamada à API — cliente aposentado de 66 anos (segmento de alta propensão):
 
 ```bash
 curl -s -X POST "http://localhost:8000/api/v1/recommend" \
   -H "Content-Type: application/json" \
-  -d '{"features": {"age":35, "job":"admin.", "marital":"married", "education":"secondary", "default":"no", "housing":"yes", "loan":"no", "contact":"cellular", "month":"may", "day_of_week":"mon", "campaign":1, "pdays":999, "previous":0, "poutcome":"unknown", "emp.var.rate":1.1, "cons.price.idx":93.994, "cons.conf.idx":-36.4, "euribor3m":4.857, "nr.employed":5191.0}}'
-# {"recommended": 1, "confidence": 0.117, "feature_names_expected": [...]}
+  -d '{"features": {"age":66, "job":"retired", "marital":"married", "education":"university.degree", "default":"no", "housing":"yes", "loan":"no", "contact":"cellular", "month":"may", "day_of_week":"mon", "campaign":1, "pdays":999, "previous":0, "poutcome":"nonexistent", "emp.var.rate":1.1, "cons.price.idx":93.994, "cons.conf.idx":-36.4, "euribor3m":4.857, "nr.employed":5191.0}}'
+# {"recommended": 1, "confidence": 0.257, "feature_names_expected": [...]}
 ```
+
+Trocando apenas idade e profissão para um operário de 45 anos, a decisão se inverte:
+
+```bash
+curl -s -X POST "http://localhost:8000/api/v1/recommend" \
+  -H "Content-Type: application/json" \
+  -d '{"features": {"age":45, "job":"blue-collar", "marital":"married", "education":"university.degree", "default":"no", "housing":"yes", "loan":"no", "contact":"cellular", "month":"may", "day_of_week":"mon", "campaign":1, "pdays":999, "previous":0, "poutcome":"nonexistent", "emp.var.rate":1.1, "cons.price.idx":93.994, "cons.conf.idx":-36.4, "euribor3m":4.857, "nr.employed":5191.0}}'
+# {"recommended": 0, "confidence": 0.060, "feature_names_expected": [...]}
+```
+
+São os mesmos dados de campanha e macroeconômicos nos dois casos — só o segmento
+(idade + profissão) muda, e com ele a posterior Beta consultada. É isso que
+diferencia a política adaptativa do Baseline, que responderia 11,3% para os dois.
+
+> Os valores categóricos aceitos são os da própria base (`data/processed/encoders.json`):
+> `education` vai de `basic.4y` a `university.degree`, e `poutcome` é `failure`,
+> `nonexistent` ou `success`. Como a recomendação é amostrada da posterior
+> (`theta ~ Beta`), chamadas repetidas para um cliente no limiar podem alternar —
+> é o mecanismo de exploração do Thompson Sampling, não instabilidade. Nos dois
+> perfis acima a posterior está longe do limiar, então a resposta é estável.
 
 `models/*.json` e `mlflow/` (tracking + artefatos) já vêm versionados no repositório, então a API e o `mlflow ui` funcionam em um clone limpo mesmo antes de rodar `train.py` de novo.
 
