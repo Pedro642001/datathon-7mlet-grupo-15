@@ -91,17 +91,19 @@ diferencia a política adaptativa do Baseline, que responderia 11,3% para os doi
 
 ## 🧪 Golden Set — 5 casos de teste
 
-Amostra reduzida (dataset completo de 20 casos em `data/processed/golden_set.csv`):
+Amostra reduzida — 3 clientes que aceitaram e 2 que rejeitaram, para cobrir os dois desfechos (conjunto completo de 20 casos em `data/processed/golden_set.csv`):
 
-| ID | Idade | Profissão     | Real (y) | Baseline Pred | Thompson Pred | Thompson Conf | Acerto |
-|----|-------|---------------|----------|---------------|---------------|---------------|--------|
-| 1  | 37    | admin.        | 1        | 1             | 1             | 0.117         | ✅     |
-| 2  | 75    | retired       | 1        | 1             | 1             | 0.257         | ✅     |
-| 3  | 42    | self-employed | 1        | 1             | 0             | 0.096         | ❌     |
-| 4  | 66    | retired       | 1        | 1             | 1             | 0.257         | ✅     |
-| 5  | 40    | technician    | 1        | 1             | 0             | 0.088         | ❌     |
+| ID | Idade | Profissão     | Real (y) | Baseline Pred | Thompson Pred | Thompson Conf | Baseline | Thompson |
+|----|-------|---------------|----------|---------------|---------------|---------------|----------|----------|
+| 1  | 37    | admin.        | 1        | 1             | 1             | 0.117         | ✅       | ✅       |
+| 2  | 75    | retired       | 1        | 1             | 1             | 0.257         | ✅       | ✅       |
+| 3  | 42    | self-employed | 1        | 1             | 0             | 0.096         | ✅       | ❌       |
+| 11 | 41    | technician    | 0        | 1             | 0             | 0.088         | ❌       | ✅       |
+| 12 | 28    | blue-collar   | 0        | 1             | 0             | 0.078         | ❌       | ✅       |
 
-A confiança do Thompson varia por segmento (25.7% para aposentados vs. 9.6% para autônomos) — reflete o contexto entrando na decisão, diferente do Baseline (11.3% fixo para todos).
+**Baseline 3/5 · Thompson 4/5.** No conjunto completo de 20 casos, Baseline acerta 10/20 e Thompson 14/20.
+
+Duas leituras importam aqui. A confiança do Thompson varia por segmento (25.7% para aposentados vs. 7.8% para operários) — é o contexto entrando na decisão, enquanto o Baseline responde 11.3% para todo mundo. E o cliente 3 mostra o limite honesto do modelo: um autônomo de 42 anos que aceitou a oferta, mas cujo segmento tem propensão histórica baixa (9.6%), então o Thompson deixou de ofertar. Como a segmentação usa só idade e profissão, casos que fogem ao padrão do segmento continuam escapando — a análise de erros completa está em `03_evaluation.ipynb`.
 
 ---
 
