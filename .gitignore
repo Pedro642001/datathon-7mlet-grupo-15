@@ -46,9 +46,6 @@ data/processed/*.json
 *.swo
 *~
 
-# Claude Code
-.claude/
-
 # Test cache
 .pytest_cache/
 

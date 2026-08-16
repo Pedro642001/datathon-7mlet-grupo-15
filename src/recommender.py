@@ -62,9 +62,9 @@ class ThompsonSampler:
     Contexto: cada cliente é mapeado para um segmento a partir de duas
     features já presentes no dataset (age, job). 'age' é discretizada em
     faixas (quartis calculados no treino) e 'job' já é uma categoria
-    codificada — a combinação (faixa_de_idade, profissão) define o
+    codificada, a combinação (faixa_de_idade, profissão) define o
     segmento. Cada segmento tem seu próprio par (alpha, beta), então a
-    posterior — e portanto a confiança e a recomendação — variam de
+    posterior, e portanto a confiança e a recomendação, variam de
     cliente para cliente conforme o contexto.
 
     A decisão de ofertar (arm=1) ou não (arm=0) para um cliente é feita
@@ -72,7 +72,7 @@ class ThompsonSampler:
     com um limiar de referência (por padrão, a taxa de aceitação global
     do treino): recomenda-se a oferta quando o valor amostrado sugere uma
     propensão acima da média histórica. A amostragem é o mecanismo de
-    exploração do Thompson Sampling — chamadas repetidas para o mesmo
+    exploração do Thompson Sampling, chamadas repetidas para o mesmo
     cliente podem gerar decisões diferentes por natureza do algoritmo.
     """
 
@@ -228,7 +228,7 @@ class OfferRecommender:
 
 
 def evaluate_recommender(recommender, X_test, y_test, name=""):
-    print(f"\n📊 Avaliação: {name}")
+    print(f"\nAvaliação: {name}")
     print("=" * 60)
     recommendations = recommender.recommend(X_test)
     probs = recommender.predict_proba(X_test)
@@ -258,4 +258,4 @@ def evaluate_recommender(recommender, X_test, y_test, name=""):
 
 
 if __name__ == '__main__':
-    print("✅ Módulo de Thompson Sampling contextual carregado")
+    print("Módulo de Thompson Sampling contextual carregado")

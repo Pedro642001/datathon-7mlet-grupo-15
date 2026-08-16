@@ -14,8 +14,8 @@ import os
 import sys
 from pathlib import Path
 
-# Executado como 'python src/train.py', o Python coloca src/ no sys.path — e não
-# a raiz do repositório —, então os imports 'from src.x import y' abaixo não
+# Executado como 'python src/train.py', o Python coloca src/ no sys.path: e não
+# a raiz do repositório, então os imports 'from src.x import y' abaixo não
 # resolvem. Inserimos a raiz antes deles, mesma abordagem já usada pelos
 # notebooks. Assim funcionam tanto 'python src/train.py' quanto 'python -m src.train'.
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -42,7 +42,7 @@ EXPERIMENT_NAME = 'datathon-offers'
 # na máquina de quem executa (o MLflow pode ter um backend padrão diferente
 # definido em ~/.config/mlflow). A partir do MLflow 3.x o backend baseado
 # em arquivos ('./mlruns') está em modo de manutenção para tracking de
-# metadados, então usamos SQLite para isso — mas os artefatos (os JSON dos
+# metadados, então usamos SQLite para isso: mas os artefatos (os JSON dos
 # modelos logados) continuam indo para uma pasta de arquivos, que também
 # fixamos dentro de mlflow/mlruns em vez do padrão './mlruns' na raiz.
 MLFLOW_DIR = Path(__file__).resolve().parent.parent / 'mlflow'

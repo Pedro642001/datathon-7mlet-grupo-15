@@ -55,7 +55,7 @@ def test_recommend_with_raw_categorical_values():
 def test_confianca_varia_por_segmento():
     """O contexto (idade + profissão) precisa mudar a posterior consultada.
     Se os dois perfis retornassem a mesma confiança, o Thompson estaria se
-    comportando como o Baseline — uma taxa global única para toda a base."""
+    comportando como o Baseline, uma taxa global única para toda a base."""
     alta = client.post('/api/v1/recommend', json=make_payload(66, 'retired')).json()
     baixa = client.post('/api/v1/recommend', json=make_payload(45, 'blue-collar')).json()
 
